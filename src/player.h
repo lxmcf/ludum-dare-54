@@ -3,8 +3,12 @@
 
 #include <raylib.h>
 
+#define PLAYER_ROTATE_SPEED 5.0f
+
 typedef struct Player {
     Texture2D texture;
+    Vector2 texture_origin;
+    Rectangle texture_rectangle;
 
     Vector2 position;
 
@@ -16,7 +20,12 @@ typedef struct Player {
 extern "C" {
 #endif
 
-Player* CreatePlayer ();
+Player* CreatePlayer (Vector2 position);
+
+void UpdatePlayer (Player* player, Camera2D camera);
+void DrawPlayer (Player* player);
+
+void UnloadPlayer (Player* player);
 
 #ifdef __cplusplus
 }
