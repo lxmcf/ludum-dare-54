@@ -1,7 +1,6 @@
 #include <raylib.h>
 #include <stdio.h>
 
-#include "common.h"
 #include "math/lxmath.h"
 #include "player.h"
 
@@ -19,7 +18,7 @@ int main (int argc, const char* argv[]) {
     const int window_width = 1280;
     const int window_height = 720;
 
-    SetTargetFPS (60);
+    // SetTargetFPS (60);
 
     InitWindow (window_width, window_height, "Ludum Dare 54");
 

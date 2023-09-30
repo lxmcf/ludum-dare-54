@@ -5,6 +5,7 @@ EXE ?= application
 BUILD ?= DEBUG
 
 CC := gcc
+COMPILER_FLAGS := -O2
 LINKER_FLAGS := -lGL -lm -lpthread -ldl -lrt -lX11
 SRC_FILES := $(wildcard src/*.c) $(wildcard src/*/*.c)
 DEFINES :=
@@ -30,7 +31,7 @@ endif
 .PHONY: build run clean
 
 build:
-	$(CC) $(DEFINES) $(SRC_FILES) -lraylib $(LINKER_FLAGS) -o $(EXE)$(EXE_EXT)
+	$(CC) $(DEFINES) $(SRC_FILES) $(COMPILER_FLAGS) -lraylib $(LINKER_FLAGS) -o $(EXE)$(EXE_EXT)
 
 run:
 	./$(EXE)$(EXE_EXT)

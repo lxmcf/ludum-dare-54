@@ -14,6 +14,9 @@ typedef struct Player {
 
     // Stored as RAD
     float rotation;
+
+    float speed;
+    float max_speed;
 } Player;
 
 #ifdef __cplusplus

@@ -21,6 +21,9 @@ Player* CreatePlayer (Vector2 position) {
     player->position = position;
     player->rotation = 0.0f;
 
+    player->speed = 0.0f;
+    player->max_speed = 1000.0f;
+
     return player;
 }
 
@@ -29,19 +32,34 @@ void UpdatePlayer (Player* player, Camera2D camera) {
 
     player->rotation = SmoothLerp (player->rotation, direction, PLAYER_ROTATE_SPEED * GetFrameTime ());
 
-    #define PLAYER_SPEED 250.0f
+    #define PLAYER_ACCELERATION 500.0f
 
+    // NOTE: Should probably use lerp
     if (IsMouseButtonDown (MOUSE_BUTTON_LEFT)) {
-        Vector2 velocity = LengthDirection (PLAYER_SPEED * GetFrameTime (), player->rotation);
-
-        player->position = Vector2Add (player->position, velocity);
+        if (player->speed < player->max_speed) {
+            player->speed += PLAYER_ACCELERATION * GetFrameTime ();
+        } else {
+            player->speed = player->max_speed;
+        }
+    } else {
+        if (player->speed > 0.0f) {
+            player->speed -= (PLAYER_ACCELERATION * 2) * GetFrameTime ();
+        } else {
+            player->speed = 0.0f;
+        }
     }
+
+    Vector2 velocity = LengthDirection (player->speed * GetFrameTime (), player->rotation);
+
+    player->position = Vector2Add (player->position, velocity);
 }
 
 void DrawPlayer (Player* player) {
     Rectangle destination = CLITERAL(Rectangle){ player->position.x, player->position.y, player->texture.width, player->texture.height };
 
     DrawTexturePro (player->texture, player->texture_rectangle, destination, player->texture_origin, player->rotation * RAD2DEG, WHITE);
+
+    DrawText (TextFormat ("%.0f", player->speed), (int)player->position.x, (int)player->position.y, 20, RED);
 }
 
 void UnloadPlayer (Player* player) {
