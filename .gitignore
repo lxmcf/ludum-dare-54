@@ -12,4 +12,5 @@ release/
 .DS_Store
 out.txt
 
-application
+game
+game.*

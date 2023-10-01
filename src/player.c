@@ -5,6 +5,7 @@ Player* CreatePlayer (Vector2 position) {
     Player* player = (Player*)MemAlloc (sizeof (Player));
 
     player->texture = LoadTexture ("assets/player.png");
+    player->thruster = LoadTexture ("assets/thruster.png");
 
     player->texture_origin = CLITERAL(Vector2){
         .x = player->texture.width / 2,
@@ -59,11 +60,20 @@ void DrawPlayer (Player* player) {
 
     DrawTexturePro (player->texture, player->texture_rectangle, destination, player->texture_origin, player->rotation * RAD2DEG, WHITE);
 
-    DrawText (TextFormat ("%.0f", player->speed), (int)player->position.x, (int)player->position.y, 20, RED);
+    // FIXME: This looks terrible... But that's fine (https://tinyurl.com/mrxmru4t)
+    if (player->speed > 0.0f) {
+        Vector2 thruster_position = Vector2Subtract (player->position, LengthDirection (player->texture.width / 2, player->rotation));
+
+        Rectangle thruster_source = CLITERAL(Rectangle){ 0, 0, player->thruster.width, player->thruster.height };
+        Rectangle thruster_destination = CLITERAL(Rectangle){ thruster_position.x, thruster_position.y, player->thruster.width, player->thruster.height };
+
+        DrawTexturePro (player->thruster, thruster_source, thruster_destination, CLITERAL(Vector2){ player->thruster.width, player->thruster.height / 2 }, player->rotation * RAD2DEG, WHITE);
+    }
 }
 
 void UnloadPlayer (Player* player) {
     UnloadTexture (player->texture);
+    UnloadTexture (player->thruster);
 
     MemFree (player);
 }

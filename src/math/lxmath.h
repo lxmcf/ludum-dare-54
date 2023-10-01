@@ -18,4 +18,9 @@ Vector2 LengthDirection (float length, float direction);
 // -----------------------------------------------------------------------------
 float SmoothLerp (float start, float end, float value);
 
+// -----------------------------------------------------------------------------
+// VECTOR MATH
+// -----------------------------------------------------------------------------
+Vector2 Vector2MultiplyValue (Vector2 vector, float value);
+
 #endif // LXMATH_H

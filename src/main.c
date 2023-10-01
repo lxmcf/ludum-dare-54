@@ -1,74 +1,154 @@
 #include <raylib.h>
 #include <stdio.h>
 
-#include "math/lxmath.h"
-#include "player.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
 
-static Player* player_ship;
+#include "scenes/scenes.h"
 
-// TEST
-static Texture2D background_stars;
-static Camera2D camera;
+#define SPACE_PURPLE CLITERAL(Color){  40, 32, 44, 255  }
+#define TARGET_FPS 60
 
-#define WINDOW_CENTRE (Vector2){ window_width / 2, window_height / 2 }
+// -----------------------------------------------------------------------------
+// LOCAL VARIABLES
+// -----------------------------------------------------------------------------
+static GameScene current_scene;
+static GameScene next_scene;
 
-static void DrawTextureTiled (Texture2D texture, Vector2 offset, Color colour);
+static Texture2D cursor;
+
+// -----------------------------------------------------------------------------
+// INLINE HELPER FUNCTIONS
+// -----------------------------------------------------------------------------
+static inline void InitCurrentScene (void);
+static inline void UpdateCurrentScene (void);
+static inline void DrawCurrentScene (void);
+static inline void GuiDrawCurrentSceneGui (void);
+static inline void UnloadCurrentScene (void);
+
+static inline GameScene FinishCurrentScene (void);
+
+// -----------------------------------------------------------------------------
+// FUNCTION
+// -----------------------------------------------------------------------------
+static void UpdateDrawFrame (void);
+static void LoadScene (GameScene scene);
 
 int main (int argc, const char* argv[]) {
     const int window_width = 1280;
     const int window_height = 720;
 
-    // SetTargetFPS (60);
+    SetTraceLogLevel (LOG_ERROR);
 
     InitWindow (window_width, window_height, "Ludum Dare 54");
 
-    player_ship = CreatePlayer (WINDOW_CENTRE);
+    HideCursor ();
 
-    background_stars = LoadTexture ("assets/background.png");
+    #ifdef BUILD_DEBUG
+        current_scene = SCENE_WORLD;
+    #else
+        current_scene = SCENE_MENU;
+    #endif
 
-    camera = CLITERAL(Camera2D){ 0 };
-    camera.offset = WINDOW_CENTRE;
-    camera.zoom = 1.0f;
+    cursor = LoadTexture ("assets/cursor.png");
 
-    while (!WindowShouldClose ()) {
-        UpdatePlayer (player_ship, camera);
+    InitCurrentScene ();
 
-        camera.target = player_ship->position;
+    #ifdef __EMSCRIPTEN__
+        emscripten_set_main_loop (UpdateDrawFrame, TARGET_FPS, 1);
+    #else
+        SetTargetFPS (TARGET_FPS);
 
-        BeginDrawing ();
-            ClearBackground (RAYWHITE);
+        while (!WindowShouldClose ()) {
+            UpdateDrawFrame ();
+        }
+    #endif
 
-            DrawTextureTiled (background_stars, player_ship->position, WHITE);
+    UnloadCurrentScene ();
 
-            BeginMode2D (camera);
-                DrawPlayer (player_ship);
-            EndMode2D ();
-
-            // DrawFPS (8, 8);
-        EndDrawing ();
-    }
-
-    UnloadPlayer (player_ship);
-
-    UnloadTexture (background_stars);
+    UnloadTexture (cursor);
 
     CloseWindow ();
 
     return 0;
 }
 
-void DrawTextureTiled (Texture2D texture, Vector2 offset, Color colour) {
-    // CAP WITHIN TEXTURE BOUNDS
-    Vector2 adjusted_offset = CLITERAL(Vector2){
-        .x = (int)offset.x % texture.width,
-        .y = (int)offset.y % texture.height
-    };
+// -----------------------------------------------------------------------------
+// FUNCTIONS
+// -----------------------------------------------------------------------------
+void UpdateDrawFrame (void) {
+    UpdateCurrentScene ();
 
-    for (int x = -texture.width; x < GetScreenWidth () + texture.width; x += texture.width) {
-        for (int y = -texture.height; y < GetScreenHeight () + texture.height; y += texture.height) {
-            Vector2 position = CLITERAL(Vector2){ .x = x, .y = y };
+    BeginDrawing ();
+        ClearBackground (SPACE_PURPLE);
+            DrawCurrentScene ();
 
-            DrawTextureV (texture, Vector2Subtract (position, adjusted_offset), colour);
-        }
+            GuiDrawCurrentSceneGui ();
+
+        #ifdef BUILD_DEBUG
+            DrawFPS (8, 8);
+        #endif
+
+        DrawTextureV (cursor, GetMousePosition (), WHITE);
+    EndDrawing ();
+
+    GameScene returned_scene = FinishCurrentScene ();
+
+    if (returned_scene != current_scene) {
+        LoadScene (returned_scene);
+    }
+}
+
+void LoadScene (GameScene scene) {
+    UnloadCurrentScene ();
+
+    current_scene = scene;
+
+    InitCurrentScene ();
+}
+
+// -----------------------------------------------------------------------------
+// INLINE HELPER FUNCTIONS
+// -----------------------------------------------------------------------------
+void InitCurrentScene (void) {
+    switch (current_scene) {
+        case SCENE_MENU:    InitMenu (); break;
+        case SCENE_WORLD:   InitWorld (); break;
+    }
+}
+
+void UpdateCurrentScene (void) {
+    switch (current_scene) {
+        case SCENE_MENU:    UpdateMenu (); break;
+        case SCENE_WORLD:   UpdateWorld (); break;
+    }
+}
+
+void DrawCurrentScene (void) {
+    switch (current_scene) {
+        case SCENE_MENU:    DrawMenu (); break;
+        case SCENE_WORLD:   DrawWorld (); break;
+    }
+}
+
+void GuiDrawCurrentSceneGui (void) {
+    switch (current_scene) {
+        case SCENE_MENU:    DrawMenuGui (); break;
+        case SCENE_WORLD:   DrawWorldGui (); break;
+    }
+}
+
+void UnloadCurrentScene (void) {
+    switch (current_scene) {
+        case SCENE_MENU:    UnloadMenu (); break;
+        case SCENE_WORLD:   UnloadWorld (); break;
+    }
+}
+
+GameScene FinishCurrentScene (void) {
+    switch (current_scene) {
+        case SCENE_MENU:    return FinishMenu ();
+        case SCENE_WORLD:   return FinishWorld ();
     }
 }

@@ -10,6 +10,8 @@ typedef struct Player {
     Vector2 texture_origin;
     Rectangle texture_rectangle;
 
+    Texture2D thruster;
+
     Vector2 position;
 
     // Stored as RAD
