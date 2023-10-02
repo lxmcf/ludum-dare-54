@@ -4,7 +4,9 @@
 typedef enum GameScene {
     SCENE_UNKOWN = -1,
     SCENE_MENU,
-    SCENE_WORLD
+    SCENE_WORLD,
+
+    SCENE_UTIL_EXIT
 } GameScene;
 
 #ifdef __cplusplus

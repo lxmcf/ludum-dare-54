@@ -25,6 +25,14 @@ Player* CreatePlayer (Vector2 position) {
     player->speed = 0.0f;
     player->max_speed = 1000.0f;
 
+    player->max_inventory_space = MAX_INVENTORY;
+    player->current_inventory_space = 0;
+
+    player->common_scrap_collected = 0;
+    player->rare_scrap_collected = 0;
+    player->epic_scrap_collected = 0;
+    player->legendary_scrap_collected = 0;
+
     return player;
 }
 
@@ -44,7 +52,8 @@ void UpdatePlayer (Player* player, Camera2D camera) {
         }
     } else {
         if (player->speed > 0.0f) {
-            player->speed -= (PLAYER_ACCELERATION * 2) * GetFrameTime ();
+            // Slow down slightly faster
+            player->speed -= (PLAYER_ACCELERATION * 1.25f) * GetFrameTime ();
         } else {
             player->speed = 0.0f;
         }
@@ -63,11 +72,12 @@ void DrawPlayer (Player* player) {
     // FIXME: This looks terrible... But that's fine (https://tinyurl.com/mrxmru4t)
     if (player->speed > 0.0f) {
         Vector2 thruster_position = Vector2Subtract (player->position, LengthDirection (player->texture.width / 2, player->rotation));
+        float player_speed_factor = player->speed / player->max_speed;
 
         Rectangle thruster_source = CLITERAL(Rectangle){ 0, 0, player->thruster.width, player->thruster.height };
-        Rectangle thruster_destination = CLITERAL(Rectangle){ thruster_position.x, thruster_position.y, player->thruster.width, player->thruster.height };
+        Rectangle thruster_destination = CLITERAL(Rectangle){ thruster_position.x, thruster_position.y, player->thruster.width * player_speed_factor, player->thruster.height * player_speed_factor };
 
-        DrawTexturePro (player->thruster, thruster_source, thruster_destination, CLITERAL(Vector2){ player->thruster.width, player->thruster.height / 2 }, player->rotation * RAD2DEG, WHITE);
+        DrawTexturePro (player->thruster, thruster_source, thruster_destination, CLITERAL(Vector2){ player->thruster.width * player_speed_factor, (player->thruster.height / 2) * player_speed_factor }, player->rotation * RAD2DEG, WHITE);
     }
 }
 

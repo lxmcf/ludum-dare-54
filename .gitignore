@@ -5,12 +5,16 @@ subprojects/
 release/
 
 # NOTE: Plan to move to WhiteBox, uncomment once done
-# .vscode/
+.vscode/
 
 *~
 
 .DS_Store
 out.txt
+libraylib.a
 
 game
 game.*
+
+index
+index.*

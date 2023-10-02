@@ -5,7 +5,7 @@ EXE ?= game
 BUILD ?= DEBUG
 
 CC := gcc
-COMPILER_FLAGS := -O2
+COMPILER_FLAGS := -O2 -Wall
 LINKER_FLAGS := -lGL -lm -lpthread -ldl -lrt -lX11
 SRC_FILES := $(wildcard src/*.c) $(wildcard src/*/*.c)
 DEFINES :=
